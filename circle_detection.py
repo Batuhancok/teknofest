@@ -1,13 +1,13 @@
-#2. olarak küçük çember 3. olarak büyük çemberden geçmeli.
 import numpy as np
+import imutils
 import cv2 as cv
 
 
-img = cv.imread('case1.png',0)
+img = cv.imread('two_circles.jpg',0)
 img = cv.medianBlur(img,5)
 cimg = cv.cvtColor(img,cv.COLOR_GRAY2BGR)
 circles = cv.HoughCircles(img,cv.HOUGH_GRADIENT,1,20,
-                            param1=20,param2=80,minRadius=0,maxRadius=100)
+                            param1=50,param2=30,minRadius=0,maxRadius=00)
 
 circles = np.uint16(np.around(circles))
 
