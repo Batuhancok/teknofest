@@ -19,7 +19,9 @@ while (cap.isOpened()):
 
         # setting threshold of gray image
         _, threshold = cv.threshold(gray, 225, 255, cv.THRESH_BINARY)
-        dilation_threshold = cv.dilate(threshold, (5,5), iterations=2)
+        dilation_threshold = cv.dilate(threshold, (5,5), iterations=4)
+        kernel = np.ones((5,5),np.uint8)
+        erosion = cv.erode(dilation_threshold,kernel,iterations = 4)
 
         cv.imshow('thresh', threshold)
         cv.waitKey(1)
@@ -43,19 +45,25 @@ while (cap.isOpened()):
                 if area > 1000:
                     cv.drawContours(frame, [contour], 0, (255, 0, 0), -1)
                     cv.putText(frame, 'D', (contour[0][0][0], contour[0][0][1]), cv.FONT_HERSHEY_SIMPLEX, 2, (0,255,0), 2)
+
+                
                 
                 M = cv.moments(contour)
                 if M['m00'] != 0:
                     cx = int(M['m10']/M['m00'])
                     cy = int(M['m01']/M['m00'])
-                    cv.drawContours(frame, [i], -1, (0, 255, 0), 2)
-                    cv.circle(frame, (cx, cy), 7, (0, 0, 255), -1)
+                    cv.drawContours(frame, [contour], -1, (0, 255, 0), 2)
+                    cv.circle(frame, (cx, cy), 9, (0, 0, 255), -1)
                     cv.putText(frame, "center", (cx - 20, cy - 20),
 	        			cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
                 print(f"x: {cx} y: {cy}")
 
             else:
                 area = cv.contourArea(contour)
+                a = 5
+                R = (area / 3.14)**0.5
+                r = ((R**2)/a)**0.5
+                r = int(r)
                 if area > 1000:
                     cv.drawContours(frame, [contour], 0, (255, 0, 0), -1)
                     cv.putText(frame, 'Y', (contour[0][0][0], contour[0][0][1]), cv.FONT_HERSHEY_SIMPLEX, 2, (0,255,0), 2)
@@ -64,8 +72,8 @@ while (cap.isOpened()):
                     if M['m00'] != 0:
                         cx = int(M['m10']/M['m00'])
                         cy = int(M['m01']/M['m00'])
-                        cv.drawContours(frame, [i], -1, (0, 255, 0), 2)
-                        cv.circle(frame, (cx, cy), 7, (0, 0, 255), -1)
+                        cv.drawContours(frame, [contour], -1, (0, 255, 0), 2)
+                        cv.circle(frame, (cx, cy), r, (0, 0, 255), -1)
                         cv.putText(frame, "center", (cx - 20, cy - 20),
 	                			cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
                 print(f"x: {cx} y: {cy}")
