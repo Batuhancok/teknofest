@@ -14,8 +14,8 @@ while (cap.isOpened()):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         # setting threshold of gray image
-        _, threshold = cv2.threshold(gray, 225, 255, cv2.THRESH_BINARY_INV)
-        #erode_threshold = cv2.erode(threshold, (5,5), iterations=2)
+        _, threshold = cv2.threshold(gray, 225, 255, cv2.THRESH_BINARY)
+        dilation_threshold = cv2.dilate(threshold, (5,5), iterations=2)
 
         cv2.imshow('thresh', threshold)
         cv2.waitKey(1)
@@ -33,14 +33,18 @@ while (cap.isOpened()):
                 contour, 0.0175 * cv2.arcLength(contour, True), True)
 
             # putting shape name at center of each shape
-            if len(approx) <= 8:
+            if len(approx) == 4:
                 cv2.drawContours(frame, [contour], 0, (0, 255, 255), -1)
+                area = cv2.contourArea(contour)
+                if area > 1000:
+                    cv2.drawContours(frame, [contour], 0, (255, 0, 0), -1)
+                    cv2.putText(frame, 'D', (contour[0][0][0], contour[0][0][1]), cv2.FONT_HERSHEY_SIMPLEX, 2, (0,255,0), 2)
 
             else:
                 area = cv2.contourArea(contour)
                 if area > 1000:
                     cv2.drawContours(frame, [contour], 0, (255, 0, 0), -1)
-                    cv2.putText(frame, 'X', (contour[0][0][0], contour[0][0][1]), cv2.FONT_HERSHEY_SIMPLEX, 2, (0,255,0), 2)
+                    cv2.putText(frame, 'Y', (contour[0][0][0], contour[0][0][1]), cv2.FONT_HERSHEY_SIMPLEX, 2, (0,255,0), 2)
 
         # displaying the image after drawing contours
         cv2.imshow('shapes', frame)
