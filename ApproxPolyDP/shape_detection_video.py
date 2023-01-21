@@ -62,14 +62,18 @@ while (cap.isOpened()):
 	        			cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
                     
                     #yönler
-                    if (cam_x-cx < 0 and cam_y-cy < 0):
-                        print("Güneybatı")
-                    elif (cam_x-cx < 0 and cam_y-cy > 0):
-                        print("Güneydoğu")
-                    elif (cam_x-cx > 0 and cam_y-cy < 0):
-                        print("Kuzeybatı")
-                    elif (cam_x-cx > 0 and cam_y-cy > 0):
-                        print("Kuzeydoğu")
+                    while (cam_x - cx != 0):
+                        if (cam_x < cx):
+                            pass #yukarı git
+                        if (cam_x > cx):
+                            pass #aşağı git
+
+                    while (cam_y - cy != 0):
+                        if (cam_y < cy):
+                            pass #sola git
+                        if (cam_y > cy):
+                            pass #sağa git
+
 
                 print(f"x: {cx} y: {cy}")
 
@@ -93,17 +97,17 @@ while (cap.isOpened()):
 	                			cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
                         
                         #yönler
-                        if (cam_x-cx < 0 and cam_y-cy < 0):
-                            print("Güneybatı")
+                        while (cam_x - cx != 0):
+                            if (cam_x < cx):
+                                pass #yukarı git
+                            if (cam_x > cx):
+                                pass #aşağı git
 
-                        elif (cam_x-cx < 0 and cam_y-cy > 0):
-                            print("Güneydoğu")
-
-                        elif (cam_x-cx > 0 and cam_y-cy < 0):
-                            print("Kuzeybatı")
-
-                        elif (cam_x-cx > 0 and cam_y-cy > 0):
-                            print("Kuzeydoğu")
+                        while (cam_y - cy != 0):
+                            if (cam_y < cy):
+                                pass #sola git
+                            if (cam_y > cy):
+                                pass #sağa git
 
                 print(f"x: {cx} y: {cy}")
        
