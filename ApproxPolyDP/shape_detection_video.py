@@ -13,6 +13,10 @@ while (cap.isOpened()):
 
     ret, frame = cap.read()
     if ret == True:
+        
+        #center of camera
+        (cam_x, cam_y) = frame.shape[:2]
+        cv.circle(frame, (cam_y // 2, cam_x // 2), 7, (255, 255, 255), -1)
             
         # converting image into grayscale image
         gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
@@ -53,9 +57,20 @@ while (cap.isOpened()):
                     cx = int(M['m10']/M['m00'])
                     cy = int(M['m01']/M['m00'])
                     cv.drawContours(frame, [contour], -1, (0, 255, 0), 2)
-                    cv.circle(frame, (cx, cy), 9, (0, 0, 255), -1)
+                    cv.circle(frame, (cx, cy), 9, (0, 0, 255), 3) #içi boş ve daire boyutuyla orantılı bir çember çizdir.
                     cv.putText(frame, "center", (cx - 20, cy - 20),
 	        			cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+                    
+                    #yönler
+                    if (cam_x-cx < 0 and cam_y-cy < 0):
+                        print("Güneybatı")
+                    elif (cam_x-cx < 0 and cam_y-cy > 0):
+                        print("Güneydoğu")
+                    elif (cam_x-cx > 0 and cam_y-cy < 0):
+                        print("Kuzeybatı")
+                    elif (cam_x-cx > 0 and cam_y-cy > 0):
+                        print("Kuzeydoğu")
+
                 print(f"x: {cx} y: {cy}")
 
             else:
@@ -73,9 +88,23 @@ while (cap.isOpened()):
                         cx = int(M['m10']/M['m00'])
                         cy = int(M['m01']/M['m00'])
                         cv.drawContours(frame, [contour], -1, (0, 255, 0), 2)
-                        cv.circle(frame, (cx, cy), r, (0, 0, 255), -1)
+                        cv.circle(frame, (cx, cy), r, (0, 0, 255), 3) #içi boş ve daire boyutuyla orantılı bir çember çizdir.
                         cv.putText(frame, "center", (cx - 20, cy - 20),
 	                			cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+                        
+                        #yönler
+                        if (cam_x-cx < 0 and cam_y-cy < 0):
+                            print("Güneybatı")
+
+                        elif (cam_x-cx < 0 and cam_y-cy > 0):
+                            print("Güneydoğu")
+
+                        elif (cam_x-cx > 0 and cam_y-cy < 0):
+                            print("Kuzeybatı")
+
+                        elif (cam_x-cx > 0 and cam_y-cy > 0):
+                            print("Kuzeydoğu")
+
                 print(f"x: {cx} y: {cy}")
        
 
