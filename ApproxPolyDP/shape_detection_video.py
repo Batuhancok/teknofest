@@ -11,7 +11,7 @@ while (cap.isOpened()):
         
         #kameranın merkezini buldum.
         (cam_x, cam_y) = frame.shape[:2]
-        cv.circle(frame, (cam_y // 2, cam_x // 2), 7, (255, 255, 255), -1)
+        cv.circle(frame, (cam_x // 2, cam_y // 2), 7, (255, 255, 255), -1)
             
         #her bir kareyi griye çevirdim, threshold uygulayabilmek için
         gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
@@ -42,6 +42,7 @@ while (cap.isOpened()):
                 cv.drawContours(frame, [contour], 0, (0, 255, 255), -1)
                 area = cv.contourArea(contour)
 
+
                 #sadece ana şekli algılayabilmek için belirli bir alan sınırı koydum.
                 if (area > 1000 or area < 10000):
                     cv.drawContours(frame, [contour], 0, (255, 0, 0), -1)
@@ -54,37 +55,42 @@ while (cap.isOpened()):
                     cx = int(M['m10']/M['m00'])
                     cy = int(M['m01']/M['m00'])
                     cv.drawContours(frame, [contour], -1, (0, 255, 0), 2)
-                    cv.circle(frame, (cx, cy), 9, (0, 0, 255), 3) #içi boş ve daire boyutuyla orantılı bir çember çizdir.
+                    
+                    #diktörgen şeklin ortasına şeklin o anki büyüklüğünün q sı kadar minik diktörgen çizdirdim. q = 2 ise küçük üçgen büyüğün yarısı
+                    kisa_kenar = 0 #kısa kenarı bul.
+                    q = 3
+                    k = kisa_kenar/q
+                    a = (-1)*(kisa_kenar/(2*q))
+                    cv.rectangle(frame, (cx + a, cy - a), (cx - a, cy + a), (0, 0, 255), 3)
                     cv.putText(frame, "center", (cx - 20, cy - 20),
 	        			cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
-                    
+                
+
+                while (area < 10000): #şekle aşırı yakın olmadığında şekli ortalamak için döngü. k = ufak dikdörtgenin bir kenarı
+                    if(cam_x - cx < k/2):
+                        x = 127
+                        y = 0
+                        z = 0
+                    if (cam_x - cx > k/2):
+                        x = -127
+                        y = 0
+                        z = 0 
+
+                    if (cam_y - cy < k/2):
+                        x = 0
+                        y = 127
+                        z = 0
+                    if (cam_y - cy > k/2):
+                        x = 0
+                        y = -127
+                        z = 0
+                
                 #kontürleri bütün olarak göremeyeceğim kadar yakınlaştığında aracın 7 saniye düz gitmesini belirttim.
                 if (area > 10000):
                     x = 0
                     y = 0
                     z = 127
                     cv.waitKey(7)
-
-                while (area < 10000): #şekle aşırı yakın olmadığında şekli ortalamak için döngü kurdum.
-                    while (cam_x - cx != 0):
-                        if (cam_x < cx): #yukarı git
-                            x = 0
-                            y = 127
-                            z = 0 
-                        if (cam_x > cx): #aşağı git
-                            x = 0
-                            y = -127
-                            z = 0 
-
-                    while (cam_y - cy != 0):
-                        if (cam_y < cy): #sola git
-                            x = -127
-                            y = 0
-                            z = 0 
-                        if (cam_y > cy): #sağa git
-                            x = 127
-                            y = 0
-                            z = 0 
 
 
                 print(f"x: {cx} y: {cy}")
@@ -96,7 +102,7 @@ while (cap.isOpened()):
                 #ana şekli yüzde kaç oranında küçültüp merkeze çizeceğim yapay dairenin yarıçapı a. (değiştirilebilir.)
                 a = 5
                 R = (area / 3.14)**0.5
-                r = ((R**2)/a)**0.5
+                r = ((R**2)/a)**0.5 
                 r = int(r)
 
                 #sadece ana şekli bulmak için alan filtreleme ve şekli isimlendirme
@@ -107,13 +113,38 @@ while (cap.isOpened()):
                     #merkeze daire çizme ve merkezi isimlendirme
                     M = cv.moments(contour)
                     if M['m00'] != 0:
-                        cx = int(M['m10']/M['m00'])
-                        cy = int(M['m01']/M['m00'])
+                        Cx = int(M['m10']/M['m00'])
+                        Cy = int(M['m01']/M['m00'])
                         cv.drawContours(frame, [contour], -1, (0, 255, 0), 2)
                         cv.circle(frame, (cx, cy), r, (0, 0, 255), 3) #içi boş ve daire boyutuyla orantılı bir çember çizdir.
+                        M_2 = cv.moments(contour)#bu kısımdan emin değilim küçük dairenin merkez koordinatlarına ulaşmaya çalıştım.
+                        if M_2['m00'] != 0:
+                            cx = int(M['m10']/M['m00'])
+                            cy = int(M['m01']/M['m00'])
+                             
                         cv.putText(frame, "center", (cx - 20, cy - 20),
 	                			cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
-                        
+
+
+                    while (area < 10000): #şekle aşırı yakın olmadığında şekli ortalamak için döngü
+                        if(cam_x - cx < r):
+                            x = 127
+                            y = 0
+                            z = 0
+                        if (cam_x - cx > r):
+                            x = -127
+                            y = 0
+                            z = 0 
+
+                        if (cam_y - cy < r):
+                            x = 0
+                            y = 127
+                            z = 0
+                        if (cam_y - cy > r):
+                            x = 0
+                            y = -127
+                            z = 0
+                    
                     #kontürleri bütün olarak göremeyeceğim kadar yakınlaştığında düz gitmesini belirttim.
                     if (area > 10000):
                         x = 0
@@ -121,26 +152,6 @@ while (cap.isOpened()):
                         z = 127
                         cv.waitKey(7)
 
-                    while (area < 10000): #şekle aşırı yakın olmadığında şekli ortalamak için.
-                        while (cam_x - cx != 0):
-                            if (cam_x < cx): #yukarı git
-                                x = 0
-                                y = 127
-                                z = 0 
-                            if (cam_x > cx): #aşağı git
-                                x = 0
-                                y = -127
-                                z = 0 
-
-                        while (cam_y - cy != 0):
-                            if (cam_y < cy): #sola git
-                                x = -127
-                                y = 0
-                                z = 0 
-                            if (cam_y > cy): #sağa git
-                                x = 127
-                                y = 0
-                                z = 0 
 
                 print(f"x: {cx} y: {cy}")
        
