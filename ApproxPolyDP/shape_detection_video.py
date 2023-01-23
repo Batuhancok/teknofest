@@ -56,7 +56,7 @@ while (cap.isOpened()):
                     cy = int(M['m01']/M['m00'])
                     cv.drawContours(frame, [contour], -1, (0, 255, 0), 2)
                     
-                    #diktörgen şeklin ortasına şeklin o anki büyüklüğünün q sı kadar minik diktörgen çizdirdim. q = 2 ise küçük üçgen büyüğün yarısı
+                    #diktörgen şeklin ortasına şeklin o anki büyüklüğünün q katı kadar küçük yapay dikdörtgen çizdirdim.
                     kisa_kenar = 0 #kısa kenarı bul.
                     q = 3
                     k = kisa_kenar/q
