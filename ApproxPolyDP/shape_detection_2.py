@@ -1,16 +1,17 @@
 import cv2 as cv
 import numpy as np
 
-rotate_list = [0, 1, 2, 3] #[x,y,z,h]
+#Videoyu okudum.
+cap = cv.VideoCapture('Shapes Song.mp4')
 
-class contour_finder():
+while (cap.isOpened()):
 
-    def __init__(self, frame):
-        self.frame = frame
-
-    def contour_calculator(self, frame):
+    ret, frame = cap.read()
+    if ret == True:
+        
+        #kameranın merkezini buldum.
         (cam_x, cam_y) = frame.shape[:2]
-        cv.circle(frame, (cam_y // 2, cam_x // 2), 7, (255, 255, 255), -1)
+        cv.circle(frame, (cam_x // 2, cam_y // 2), 7, (255, 255, 255), -1)
             
         #her bir kareyi griye çevirdim, threshold uygulayabilmek için
         gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
@@ -24,24 +25,14 @@ class contour_finder():
         cv.imshow('thresh', threshold)
         cv.waitKey(1)
 
-        # kontürleri buldum
+        # kontürleri bulma fonksiyonu kullandım bu kontürler üzerinde gezebilmek için
         contours, _ = cv.findContours(
             erosion, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-        
-        return contours
 
-
-class rectangle():
-
-    def __init__(self, frame, contour):
-        self.frame = frame
-        self.contour = contour
-
-    def rectangle_finder(self, frame, contour):
 
         #kontürler arasında tek tek dolaşabildiğim döngü oluşturdum
-        for contour in contour_finder.contour_calculator(frame):
-            
+        for contour in contours:
+
             # nesne belirleme algoritması olan approxpolydp kullandım.
             approx = cv.approxPolyDP(
                 contour, 0.0175 * cv.arcLength(contour, True), True)
@@ -51,11 +42,13 @@ class rectangle():
                 cv.drawContours(frame, [contour], 0, (0, 255, 255), -1)
                 area = cv.contourArea(contour)
 
+
                 #sadece ana şekli algılayabilmek için belirli bir alan sınırı koydum.
-                if (area > 1000 and area < 10000):
+                if (area > 1000 or area < 10000):
                     cv.drawContours(frame, [contour], 0, (255, 0, 0), -1)
                     cv.putText(frame, 'D', (contour[0][0][0], contour[0][0][1]), cv.FONT_HERSHEY_SIMPLEX, 2, (0,255,0), 2)
 
+                
                 #şeklin ortasını buldum ve isimlendirdim.
                 M = cv.moments(contour)
                 if M['m00'] != 0:
@@ -72,7 +65,7 @@ class rectangle():
                     cv.putText(frame, "center", (cx - 20, cy - 20),
 	        			cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
                 
-                (cam_x, cam_y) = frame.shape[:2]#kameranın merkezini buldum.
+
                 while (area < 10000): #şekle aşırı yakın olmadığında şekli ortalamak için döngü. k = ufak dikdörtgenin bir kenarı
                     if(cam_x - cx < k/2):
                         x = 127
@@ -99,22 +92,11 @@ class rectangle():
                     z = 127
                     cv.waitKey(7)
 
-class circle():
-    def __init__(self, frame, contour):
-        self.frame = frame
-        self.contour = contour
 
-    def rectagle_detector(self, frame, contour):
-        
-        #kontürlerde gezebilmek için döngü oluşturdum.
-        for contour in contour_finder.contour_calculator(frame):
+                print(f"x: {cx} y: {cy}")
 
-            # nesne belirleme algoritması olan approxpolydp kullandım.
-            approx = cv.approxPolyDP(
-                contour, 0.0175 * cv.arcLength(contour, True), True)
-
-            
-            if len(approx) > 6:
+            #daire şekli için:
+            else:
                 area = cv.contourArea(contour)
                 
                 #ana şekli yüzde kaç oranında küçültüp merkeze çizeceğim yapay dairenin yarıçapı a. (değiştirilebilir.)
@@ -143,7 +125,7 @@ class circle():
                         cv.putText(frame, "center", (cx - 20, cy - 20),
 	                			cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
 
-                    (cam_x, cam_y) = frame.shape[:2]
+
                     while (area < 10000): #şekle aşırı yakın olmadığında şekli ortalamak için döngü
                         if(cam_x - cx < r):
                             x = 127
@@ -170,5 +152,11 @@ class circle():
                         z = 127
                         cv.waitKey(7)
 
-                elif (area > 10000):
-                    print("Düz")
+
+                print(f"x: {cx} y: {cy}")
+
+        # kontürleri çizdikten sonra görüntülemek
+        cv.imshow('shapes', frame)
+
+        cv.waitKey(1)
+        #cv2.destroyAllWindows()
