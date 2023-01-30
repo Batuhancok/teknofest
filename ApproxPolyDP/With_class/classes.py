@@ -100,13 +100,17 @@ class rectangle():
                     #cv.waitKey(7)
 
 class circle():
-    def __init__(self, frame):
+    
+    def __init__(self, frame, contour):
         self.frame = frame
+        self.contour = contour
 
     def circle_finder(self, frame):
         
+        contours = contour_finder.contour_calculator(frame)
+
         #kontürlerde gezebilmek için döngü oluşturdum.
-        for contour in contour_finder.contour_calculator(frame):
+        for contour in contours:
 
             # nesne belirleme algoritması olan approxpolydp kullandım.
             approx = cv.approxPolyDP(
@@ -114,49 +118,54 @@ class circle():
 
             
             if len(approx) > 8:
-                area = cv.contourArea(contour)
-
-                """kontürleri büyükten küçüğe listele. 
-                Bulduğun küçük kontür(daire) için öncelikli olarak içinden geçme işlemlerini uygula.
-                en sonunda shape_counter değişkenini 2 yap. 
-                daha sonra shape_counter == 2 ise elif kullanarak diğer daireye yönlendir.
-                Diğer daire için işlemler bitince shape_counter = 3 olsun ve böylece görev tamamlansın. """
+                return True
                 
-                #ana şekli yüzde kaç oranında küçültüp merkeze çizeceğim yapay dairenin yarıçapı a. (değiştirilebilir.)
-                a = 5
-                R = (area / 3.14)**0.5
-                r = ((R**2)/a)**0.5 
-                r = int(r)
+                
+                #area = cv.contourArea(contour)
 
-                #sadece ana şekli bulmak için alan filtreleme ve şekli isimlendirme
-                if (area > 1000 and area < 10000):
-                    cv.drawContours(frame, [contour], 0, (255, 0, 0), -1)
-                    cv.putText(frame, 'Y', (contour[0][0][0], contour[0][0][1]), cv.FONT_HERSHEY_SIMPLEX, 2, (0,255,0), 2)
+                #return area
 
-                    #merkeze daire çizme ve merkezi isimlendirme
-                    M = cv.moments(contour)
-                    if M['m00'] != 0:
-                        cx = int(M['m10']/M['m00'])
-                        cy = int(M['m01']/M['m00'])
-                        cv.drawContours(frame, [contour], -1, (0, 255, 0), 2)
-                        cv.circle(frame, (cx, cy), r, (0, 0, 255), 3) #içi boş ve daire boyutuyla orantılı bir çember çizdirdim     
-                        cv.putText(frame, "center", (cx - 20, cy - 20),
-	                			cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+    
+    def circle_move(self, frame, contour):
+        
+        contours = contour_finder.contour_calculator(frame)
 
-                    (cam_x, cam_y) = frame.shape[:2]
-                    while (area < 10000): #şekle aşırı yakın olmadığında şekli ortalamak için döngü
-                        
-                        if(cam_x - cx < r):
-                            return [100, 0, 0, 0]
-                        if (cam_x - cx > r):
-                            return [-100, 0, 0, 0]
+        for contour in contours:
+            area = circle.circle_finder(frame) #classın içindeki fonksiyonlar iç içe geçmiş şekilde çalışır mı?
 
-                        if (cam_y - cy < r):
-                            return [0, 100, 0, 0]
-                        if (cam_y - cy > r):
-                            return [0, -100, 0, 0]
+            #ana şekli yüzde kaç oranında küçültüp merkeze çizeceğim yapay dairenin yarıçapı a. (değiştirilebilir.)
+            a = 5
+            R = (area / 3.14)**0.5
+            r = ((R**2)/a)**0.5 
+            r = int(r)
 
-                #kontürleri bütün olarak göremeyeceğim kadar yakınlaştığında düz gitmesini belirttim.
-                elif (area > 10000):
-                    return [0, 0, 100, 0]
-                    #cv.waitKey(7)
+            #sadece ana şekli bulmak için alan filtreleme ve şekli isimlendirme
+            if (area > 1000 and area < 10000):
+                cv.drawContours(frame, [contour], 0, (255, 0, 0), -1)
+                cv.putText(frame, 'Y', (contour[0][0][0], contour[0][0][1]), cv.FONT_HERSHEY_SIMPLEX, 2, (0,255,0), 2)
+                #merkeze daire çizme ve merkezi isimlendirme
+                M = cv.moments(contour)
+                if M['m00'] != 0:
+                    cx = int(M['m10']/M['m00'])
+                    cy = int(M['m01']/M['m00'])
+                    cv.drawContours(frame, [contour], -1, (0, 255, 0), 2)
+                    cv.circle(frame, (cx, cy), r, (0, 0, 255), 3) #içi boş ve daire boyutuyla orantılı bir çember çizdirdim     
+                    cv.putText(frame, "center", (cx - 20, cy - 20),
+	            			cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+
+                (cam_x, cam_y) = frame.shape[:2]
+
+                while (area < 10000): #şekle aşırı yakın olmadığında şekli ortalamak için döngü
+
+                    if(cam_x - cx < r):
+                        return [100, 0, 0, 0]
+                    if (cam_x - cx > r):
+                        return [-100, 0, 0, 0]
+                    if (cam_y - cy < r):
+                        return [0, 100, 0, 0]
+                    if (cam_y - cy > r):
+                        return [0, -100, 0, 0]
+            #kontürleri bütün olarak göremeyeceğim kadar yakınlaştığında düz gitmesini belirttim.
+            elif (area > 10000):
+                return [0, 0, 100, 0]
+                #cv.waitKey(7)

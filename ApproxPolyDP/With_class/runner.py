@@ -32,74 +32,39 @@ while (cap.isOpened()):
 
         #ilk şekilden (dikdörtgen) geçerse araç, küçük daireyi aramaya başlayacak.
         while (shape_counter == 1):
-            pass
+            contours = shape_detector.contour_finder.contour_calculator(frame)
+            
+            while (shape_detector.circle.circle_finder(frame) == True):
+                sorted_contours = sorted(contours, key=cv.contourArea, reverse=True) #büyükten küçüğe kontürleri sıraladım.
+                small_circle = sorted_contours[1]
 
-
-        
-        
-"""        
-#daire şekli için:
-            else:
-                area = cv.contourArea(contour)
+                small_circle_rotate_list = shape_detector.circle.circle_move(frame, small_circle)
+                small_circle_rotate_list
                 
-                #ana şekli yüzde kaç oranında küçültüp merkeze çizeceğim yapay dairenin yarıçapı a. (değiştirilebilir.)
-                a = 5
-                R = (area / 3.14)**0.5
-                r = ((R**2)/a)**0.5 
-                r = int(r)
-
-                #sadece ana şekli bulmak için alan filtreleme ve şekli isimlendirme
-                if (area > 1000 and area < 10000):
-                    cv.drawContours(frame, [contour], 0, (255, 0, 0), -1)
-                    cv.putText(frame, 'Y', (contour[0][0][0], contour[0][0][1]), cv.FONT_HERSHEY_SIMPLEX, 2, (0,255,0), 2)
-
-                    #merkeze daire çizme ve merkezi isimlendirme
-                    M = cv.moments(contour)
-                    if M['m00'] != 0:
-                        Cx = int(M['m10']/M['m00'])
-                        Cy = int(M['m01']/M['m00'])
-                        cv.drawContours(frame, [contour], -1, (0, 255, 0), 2)
-                        cv.circle(frame, (cx, cy), r, (0, 0, 255), 3) #içi boş ve daire boyutuyla orantılı bir çember çizdir.
-                        M_2 = cv.moments(contour)#bu kısımdan emin değilim küçük dairenin merkez koordinatlarına ulaşmaya çalıştım.
-                        if M_2['m00'] != 0:
-                            cx = int(M['m10']/M['m00'])
-                            cy = int(M['m01']/M['m00'])
-                             
-                        cv.putText(frame, "center", (cx - 20, cy - 20),
-	                			cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+                if (small_circle_rotate_list == [0, 0, 100, 0]):
+                    print(small_circle_rotate_list)
+                    cv.waitKey(7)
+                    shape_counter = 2
+                    break
+                
+                print(small_circle_rotate_list)
 
 
-                    while (area < 10000): #şekle aşırı yakın olmadığında şekli ortalamak için döngü
-                        if(cam_x - cx < r):
-                            x = 127
-                            y = 0
-                            z = 0
-                        if (cam_x - cx > r):
-                            x = -127
-                            y = 0
-                            z = 0 
+        
+        while (shape_counter == 2):
+            contours = shape_detector.contour_finder.contour_calculator(frame)
 
-                        if (cam_y - cy < r):
-                            x = 0
-                            y = 127
-                            z = 0
-                        if (cam_y - cy > r):
-                            x = 0
-                            y = -127
-                            z = 0
-                    
-                    #kontürleri bütün olarak göremeyeceğim kadar yakınlaştığında düz gitmesini belirttim.
-                    if (area > 10000):
-                        x = 0
-                        y = 0
-                        z = 127
-                        cv.waitKey(7)
+            while (shape_detector.circle.circle_finder(frame) == True):
+                sorted_contours = sorted(contours, key=cv.contourArea, reverse=True) #büyükten küçüğe kontürleri sıraladım.
+                big_circle = sorted_contours[0]
 
+                big_circle_rotate_list = shape_detector.circle.circle_move(frame, big_circle)
+                big_circle_rotate_list
 
-                print(f"x: {cx} y: {cy}")
-
-        # kontürleri çizdikten sonra görüntülemek
-        cv.imshow('shapes', frame)
-
-        cv.waitKey(1)
-        #cv2.destroyAllWindows()"""
+                if (big_circle_rotate_list == [0, 0, 100, 0]):
+                    print(big_circle_rotate_list)
+                    cv.waitKey(7)
+                    shape_counter = 3
+                    break
+                
+                print(big_circle_rotate_list)
