@@ -14,7 +14,7 @@ class contour_finder():
         #her bir kareyi griye çevirdim, threshold uygulayabilmek için
         gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
 
-        #Gri resme threshold ayarladım.
+        #Gri resme threshold ve morfolojik işlemler uyguladım.
         _, threshold = cv.threshold(gray, 225, 255, cv.THRESH_BINARY)
         dilation_threshold = cv.dilate(threshold, (5,5), iterations=4)
         kernel = np.ones((5,5),np.uint8)
@@ -23,7 +23,7 @@ class contour_finder():
         cv.imshow('thresh', threshold)
         cv.waitKey(1)
 
-        # kontürleri buldum
+        #İşlediğim görseldeki kontürleri buldum
         contours, _ = cv.findContours(
             erosion, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
         
@@ -62,7 +62,7 @@ class rectangle():
                     cv.drawContours(frame, [contour], -1, (0, 255, 0), 2)
                     
                     #diktörgen şeklin ortasına şeklin o anki büyüklüğünün q katı kadar küçük yapay dikdörtgen çizdirdim.
-                    kisa_kenar = 0 #kısa kenarı bul.
+                    kisa_kenar = 0 #kısa kenarı bul.?????
                     q = 3
                     k = kisa_kenar/q
                     a = (-1)*(kisa_kenar/(2*q))
@@ -92,12 +92,10 @@ class rectangle():
 
                 
                 #kontürleri bütün olarak göremeyeceğim kadar yakınlaştığında aracın 7 saniye düz gitmesini belirttim.
-                #sıkıntılı yer. Burayı incele.
                 if (area > 10000):
                     rotate_list = [0] * 4
                     rotate_list[2] = 100
                     return rotate_list
-                    #cv.waitKey(7)
 
 class circle():
     
@@ -116,22 +114,19 @@ class circle():
             approx = cv.approxPolyDP(
                 contour, 0.0175 * cv.arcLength(contour, True), True)
 
-            
-            if len(approx) > 8:
+            if len(approx) > 8: #daire ise True döndürecek koşul.
                 return True
+            
+            else:
+                return False
                 
-                
-                #area = cv.contourArea(contour)
-
-                #return area
-
     
     def circle_move(self, frame, contour):
         
         contours = contour_finder.contour_calculator(frame)
 
         for contour in contours:
-            area = circle.circle_finder(frame) #classın içindeki fonksiyonlar iç içe geçmiş şekilde çalışır mı?
+            area = circle.circle_finder(frame) #classın içindeki fonksiyonlar iç içe geçmiş şekilde çalışır mı?????
 
             #ana şekli yüzde kaç oranında küçültüp merkeze çizeceğim yapay dairenin yarıçapı a. (değiştirilebilir.)
             a = 5
@@ -143,6 +138,7 @@ class circle():
             if (area > 1000 and area < 10000):
                 cv.drawContours(frame, [contour], 0, (255, 0, 0), -1)
                 cv.putText(frame, 'Y', (contour[0][0][0], contour[0][0][1]), cv.FONT_HERSHEY_SIMPLEX, 2, (0,255,0), 2)
+
                 #merkeze daire çizme ve merkezi isimlendirme
                 M = cv.moments(contour)
                 if M['m00'] != 0:
@@ -156,16 +152,26 @@ class circle():
                 (cam_x, cam_y) = frame.shape[:2]
 
                 while (area < 10000): #şekle aşırı yakın olmadığında şekli ortalamak için döngü
-
+                    rotate_list = [0] * 4
+                    
                     if(cam_x - cx < r):
-                        return [100, 0, 0, 0]
+                        rotate_list[0] = 100
+                        return rotate_list
+
                     if (cam_x - cx > r):
-                        return [-100, 0, 0, 0]
+                        rotate_list[0] = -100
+                        return rotate_list
+                    
                     if (cam_y - cy < r):
-                        return [0, 100, 0, 0]
+                        rotate_list[1] = 100
+                        return rotate_list
+                    
                     if (cam_y - cy > r):
-                        return [0, -100, 0, 0]
+                        rotate_list[1] = -100
+                        return rotate_list
+
             #kontürleri bütün olarak göremeyeceğim kadar yakınlaştığında düz gitmesini belirttim.
             elif (area > 10000):
-                return [0, 0, 100, 0]
-                #cv.waitKey(7)
+                rotate_list = [0] * 4
+                rotate_list[2] = 100
+                return rotate_list
