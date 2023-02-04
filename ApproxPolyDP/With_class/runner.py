@@ -3,7 +3,7 @@ import numpy as np
 import classes as shape_detector
 import time
 
-#sadece 3 şekilden geçmesi için koydum.
+#aynı şekilden tekrar geçmemek için koydum.
 rectangle_pass = False
 small_circle_pass = False
 big_circle_pass = False

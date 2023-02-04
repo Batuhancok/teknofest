@@ -25,7 +25,7 @@ class contour_finder():
         #İşlediğim görseldeki kontürleri buldum
         contours, _ = cv.findContours(
             erosion, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-            
+
         return contours
 
 
@@ -61,6 +61,7 @@ class rectangle():
         for contour in contours:
 
             area = cv.contourArea(contour)
+            
 
             #sadece ana şekli algılayabilmek için belirli bir alan sınırı koydum.
             if (area > 1000 and area < 10000):
@@ -74,8 +75,14 @@ class rectangle():
                     cy = int(M['m01']/M['m00'])
                     #cv.drawContours(frame, [contour], -1, (0, 255, 0), 2)
                     
+                    d_x,d_y,d_w,d_h = cv.boundingRect(contour)
+                    if(abs(d_x - d_w) > abs(d_y - d_h)):
+                        kisa_kenar = abs(d_y - d_h)
+
+                    else:
+                        kisa_kenar = abs(d_x - d_w)
+
                     #diktörgen şeklin ortasına şeklin o anki büyüklüğünün q katı kadar küçük yapay dikdörtgen çizdirdim.
-                    kisa_kenar = 0 #kısa kenarı bul.?????
                     q = 3
                     k = kisa_kenar/q
                     a = (-1)*(kisa_kenar/(2*q))
@@ -142,7 +149,7 @@ class circle():
                 
     
     def circle_move(self, frame, contour):
-        
+        (cam_x, cam_y) = frame.shape[:2]        
         contours = contour_finder.contour_calculator(frame)
 
         for contour in contours:
@@ -155,7 +162,7 @@ class circle():
             r = int(r)
 
             #sadece ana şekli bulmak için alan filtreleme ve şekli isimlendirme
-            if (area > 1000 and area < 10000):
+            while (area > 1000 and area < 10000):
                 #cv.drawContours(frame, [contour], 0, (255, 0, 0), -1)
                 #cv.putText(frame, 'Y', (contour[0][0][0], contour[0][0][1]), cv.FONT_HERSHEY_SIMPLEX, 2, (0,255,0), 2)
 
@@ -169,31 +176,28 @@ class circle():
                     #cv.putText(frame, "center", (cx - 20, cy - 20),
 	            			#cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
 
-                (cam_x, cam_y) = frame.shape[:2]
 
-                while (area < 10000): #şekle aşırı yakın olmadığında şekli ortalamak için döngü
-                    rotate_list = [0] * 4
-                    
-                    while(abs(cam_x - cx) > r): 
-                        if(cam_x - cx < r):
-                            rotate_list[0] = 50
-                            return rotate_list
-
-                        elif (cam_x - cx > r):
-                            rotate_list[0] = -50
-                            return rotate_list
-                    
-                    while(abs(cam_y - cy) > r):
-                        if (cam_y - cy < r):#yukarı çık
-                            rotate_list[2] = 50
-                            return rotate_list
-                    
-                        elif (cam_y - cy > r):#aşağı in
-                            rotate_list[2] = -50
-                            return rotate_list
+                rotate_list = [0] * 4
+                
+                while(abs(cam_x - cx) > r): 
+                    if(cam_x - cx < r):
+                        rotate_list[0] = 50
+                        return rotate_list
+                    elif (cam_x - cx > r):
+                        rotate_list[0] = -50
+                        return rotate_list
+                
+                while(abs(cam_y - cy) > r):
+                    if (cam_y - cy < r):#yukarı çık
+                        rotate_list[2] = 50
+                        return rotate_list
+                
+                    elif (cam_y - cy > r):#aşağı in
+                        rotate_list[2] = -50
+                        return rotate_list
 
             #kontürleri bütün olarak göremeyeceğim kadar yakınlaştığında düz gitmesini belirttim.
-            elif (area > 10000):
+            if (area > 10000):
                 rotate_list = [0] * 4
                 rotate_list[1] = 50
                 return rotate_list
